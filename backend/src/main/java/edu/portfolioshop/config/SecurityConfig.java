@@ -49,7 +49,10 @@ public class SecurityConfig {
                         // verified before anything in it is trusted.
                         .requestMatchers(HttpMethod.POST, "/api/payments/btcpay/webhook").permitAll()
 
-                        // Everything else under /api/admin/** needs the shop-admin role.
+                        // The admin screens are part of the portfolio demo, so any signed-in
+                        // visitor can look around read-only — only the mutating verbs (create,
+                        // edit, delete, change an order's status) require the shop-admin role.
+                        .requestMatchers(HttpMethod.GET, "/api/admin/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("shop-admin")
 
                         // Own account, own addresses, own orders, opening a checkout — all
@@ -107,7 +110,7 @@ public class SecurityConfig {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
-                    .allowedOrigins("https://shop.fanvote.app", "http://localhost:4300")
+                    .allowedOrigins("https://shop.adriandragota.com", "http://localhost:4300")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedHeaders("*")
                     .allowCredentials(true)
