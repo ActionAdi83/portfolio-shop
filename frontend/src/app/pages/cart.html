@@ -1,0 +1,75 @@
+<div class="max-w-4xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold mb-6">Your cart</h1>
+
+  @if (cart.items().length === 0) {
+    <p class="text-slate-500">Your cart is empty. <a routerLink="/products" class="text-brand hover:underline">Browse products</a>.</p>
+  } @else {
+    <div class="card divide-y divide-slate-100 mb-6">
+      @for (line of cart.items(); track line.product.id) {
+        <div class="flex items-center gap-4 p-4">
+          <div class="w-16 h-16 bg-slate-100 rounded-md overflow-hidden shrink-0">
+            @if (line.product.imageUrls.length) {
+              <img [src]="line.product.imageUrls[0]" [alt]="line.product.name" class="w-full h-full object-cover">
+            }
+          </div>
+          <div class="flex-1">
+            <p class="font-semibold">{{ line.product.name }}</p>
+            <p class="text-sm text-slate-500">{{ line.product.price | number:'1.2-2' }} USD each</p>
+          </div>
+          <input type="number" min="1" class="w-16" [value]="line.quantity"
+            (input)="setQuantity(line.product.id, $any($event.target).value)">
+          <span class="w-24 text-right font-semibold">{{ (line.quantity * line.product.price) | number:'1.2-2' }}</span>
+          <button class="text-red-600 text-sm hover:underline" (click)="cart.remove(line.product.id)">Remove</button>
+        </div>
+      }
+    </div>
+
+    <div class="flex justify-end mb-8">
+      <span class="text-xl font-bold">Total: {{ cart.totalPrice() | number:'1.2-2' }} USD</span>
+    </div>
+
+    <div class="card p-6 mb-6">
+      <h2 class="font-semibold mb-4">Shipping address</h2>
+
+      @if (!authenticated()) {
+        <p class="text-slate-500 text-sm">Sign in at checkout to choose or enter a shipping address.</p>
+      } @else {
+        @if (addresses().length > 0) {
+          <div class="mb-4 space-y-2">
+            @for (address of addresses(); track address.id) {
+              <label class="flex items-center gap-2 text-sm">
+                <input type="radio" name="address" [value]="address.id"
+                  [checked]="!useNewAddress() && selectedAddressId() === address.id"
+                  (change)="useNewAddress.set(false); selectedAddressId.set(address.id)">
+                <span>{{ address.label }} — {{ address.line1 }}, {{ address.city }}, {{ address.country }}</span>
+              </label>
+            }
+            <label class="flex items-center gap-2 text-sm">
+              <input type="radio" name="address" [checked]="useNewAddress()" (change)="useNewAddress.set(true)">
+              <span>Use a new address</span>
+            </label>
+          </div>
+        }
+
+        @if (useNewAddress() || addresses().length === 0) {
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div><label>Label</label><input type="text" [(ngModel)]="newAddress.label" name="label"></div>
+            <div><label>Country</label><input type="text" [(ngModel)]="newAddress.country" name="country"></div>
+            <div class="sm:col-span-2"><label>Address line 1</label><input type="text" [(ngModel)]="newAddress.line1" name="line1"></div>
+            <div class="sm:col-span-2"><label>Address line 2 (optional)</label><input type="text" [(ngModel)]="newAddress.line2" name="line2"></div>
+            <div><label>City</label><input type="text" [(ngModel)]="newAddress.city" name="city"></div>
+            <div><label>Postal code</label><input type="text" [(ngModel)]="newAddress.postalCode" name="postalCode"></div>
+          </div>
+        }
+      }
+    </div>
+
+    @if (error()) {
+      <p class="text-red-600 text-sm mb-4">{{ error() }}</p>
+    }
+
+    <button class="btn-primary w-full sm:w-auto" (click)="checkout()" [disabled]="submitting()">
+      {{ authenticated() ? 'Place order & pay with BTCPay' : 'Sign in to checkout' }}
+    </button>
+  }
+</div>

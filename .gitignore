@@ -1,0 +1,19 @@
+# Secrets — never commit these.
+.env
+.env.*
+!.env.example
+
+# Backend (Maven / Java)
+backend/target/
+*.class
+
+# Frontend (Angular / Node)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/npm-debug.log*
+
+# IDE
+.idea/
+*.iml
+.vscode/

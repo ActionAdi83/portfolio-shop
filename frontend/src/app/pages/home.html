@@ -1,0 +1,34 @@
+<section class="bg-gradient-to-br from-brand to-brand-dark text-white">
+  <div class="max-w-6xl mx-auto px-4 py-20 flex flex-col items-start gap-6">
+    <h1 class="text-4xl sm:text-5xl font-extrabold max-w-xl">Run further. Look sharper.</h1>
+    <p class="max-w-lg text-white/90 text-lg">
+      Performance sport shoes for every stride — engineered for the road, the trail
+      and the city in between. Pay however you like, including Bitcoin.
+    </p>
+    <a routerLink="/products" class="btn bg-white text-brand-dark hover:bg-slate-100">Shop now</a>
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-4 py-12">
+  <h2 class="text-2xl font-bold mb-6">Featured products</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    @for (product of featured(); track product.id) {
+      <div class="card p-4 flex flex-col">
+        <a [routerLink]="['/products', product.id]" class="block aspect-square bg-slate-100 rounded-md mb-3 overflow-hidden">
+          @if (product.imageUrls.length) {
+            <img [src]="product.imageUrls[0]" [alt]="product.name" class="w-full h-full object-cover">
+          } @else {
+            <div class="w-full h-full grid place-items-center text-slate-400 text-sm">No image yet</div>
+          }
+        </a>
+        <a [routerLink]="['/products', product.id]" class="font-semibold hover:text-brand">{{ product.name }}</a>
+        <span class="text-slate-500 text-sm mb-3">{{ product.price | number:'1.2-2' }} USD</span>
+        <button class="btn-primary mt-auto" (click)="addToCart(product)" [disabled]="product.stock <= 0">
+          {{ product.stock > 0 ? 'Add to cart' : 'Out of stock' }}
+        </button>
+      </div>
+    } @empty {
+      <p class="text-slate-500 col-span-4">No products yet — run the seeder to add the demo catalogue.</p>
+    }
+  </div>
+</section>

@@ -1,0 +1,43 @@
+<div class="max-w-6xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-8">
+  <aside class="sm:w-56 shrink-0">
+    <h2 class="font-semibold mb-3">Categories</h2>
+    <ul class="space-y-1 text-sm">
+      <li>
+        <button class="w-full text-left px-2 py-1.5 rounded-md hover:bg-slate-100"
+          [class.bg-slate-200]="selectedSlug() === ''"
+          (click)="selectCategory('')">All products</button>
+      </li>
+      @for (category of categories(); track category.id) {
+        <li>
+          <button class="w-full text-left px-2 py-1.5 rounded-md hover:bg-slate-100"
+            [class.bg-slate-200]="selectedSlug() === category.slug"
+            (click)="selectCategory(category.slug)">{{ category.name }}</button>
+        </li>
+      }
+    </ul>
+  </aside>
+
+  <div class="flex-1">
+    <h1 class="text-2xl font-bold mb-6">Products</h1>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      @for (product of products(); track product.id) {
+        <div class="card p-4 flex flex-col">
+          <a [routerLink]="['/products', product.id]" class="block aspect-square bg-slate-100 rounded-md mb-3 overflow-hidden">
+            @if (product.imageUrls.length) {
+              <img [src]="product.imageUrls[0]" [alt]="product.name" class="w-full h-full object-cover">
+            } @else {
+              <div class="w-full h-full grid place-items-center text-slate-400 text-sm">No image yet</div>
+            }
+          </a>
+          <a [routerLink]="['/products', product.id]" class="font-semibold hover:text-brand">{{ product.name }}</a>
+          <span class="text-slate-500 text-sm mb-3">{{ product.price | number:'1.2-2' }} USD</span>
+          <button class="btn-primary mt-auto" (click)="addToCart(product)" [disabled]="product.stock <= 0">
+            {{ product.stock > 0 ? 'Add to cart' : 'Out of stock' }}
+          </button>
+        </div>
+      } @empty {
+        <p class="text-slate-500 col-span-3">No products in this category yet.</p>
+      }
+    </div>
+  </div>
+</div>

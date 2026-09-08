@@ -1,0 +1,113 @@
+<div class="max-w-6xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold mb-6">Shop admin</h1>
+
+  <div class="flex gap-2 mb-6 border-b border-slate-200">
+    <button class="px-4 py-2 text-sm font-medium" [class.border-b-2]="tab() === 'products'" [class.border-brand]="tab() === 'products'" (click)="selectTab('products')">Products</button>
+    <button class="px-4 py-2 text-sm font-medium" [class.border-b-2]="tab() === 'categories'" [class.border-brand]="tab() === 'categories'" (click)="selectTab('categories')">Categories</button>
+    <button class="px-4 py-2 text-sm font-medium" [class.border-b-2]="tab() === 'orders'" [class.border-brand]="tab() === 'orders'" (click)="selectTab('orders')">Orders</button>
+  </div>
+
+  @if (tab() === 'products') {
+    <div class="space-y-4">
+      <table class="w-full text-sm card overflow-hidden">
+        <thead class="bg-slate-100 text-left">
+          <tr><th class="p-3">Name</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3"></th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (product of products(); track product.id) {
+            <tr>
+              <td class="p-3">{{ product.name }}</td>
+              <td class="p-3">{{ product.categorySlug }}</td>
+              <td class="p-3">{{ product.price | number:'1.2-2' }}</td>
+              <td class="p-3">{{ product.stock }}</td>
+              <td class="p-3 text-right space-x-3">
+                <button class="text-brand hover:underline" (click)="startEditProduct(product)">Edit</button>
+                <button class="text-red-600 hover:underline" (click)="deleteProduct(product.id)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (editingProductId()) {
+        <div class="card p-6 grid sm:grid-cols-2 gap-3">
+          <div><label>Name</label><input type="text" [(ngModel)]="productForm.name" name="name"></div>
+          <div><label>Category slug</label><input type="text" [(ngModel)]="productForm.categorySlug" name="categorySlug"></div>
+          <div class="sm:col-span-2"><label>Description</label><textarea [(ngModel)]="productForm.description" name="description" rows="2"></textarea></div>
+          <div><label>Price</label><input type="number" min="0" step="0.01" [(ngModel)]="productForm.price" name="price"></div>
+          <div><label>Stock</label><input type="number" min="0" [(ngModel)]="productForm.stock" name="stock"></div>
+          <div class="sm:col-span-2"><label>Image URLs (comma separated)</label><input type="text" [(ngModel)]="imageUrlsText" name="imageUrls"></div>
+          <div class="sm:col-span-2 flex gap-3">
+            <button class="btn-primary" (click)="saveProduct()">Save product</button>
+            <button class="btn-secondary" (click)="cancelProduct()">Cancel</button>
+          </div>
+        </div>
+      } @else {
+        <button class="btn-secondary" (click)="startCreateProduct()">Add product</button>
+      }
+    </div>
+  }
+
+  @if (tab() === 'categories') {
+    <div class="space-y-4">
+      <table class="w-full text-sm card overflow-hidden">
+        <thead class="bg-slate-100 text-left">
+          <tr><th class="p-3">Name</th><th class="p-3">Slug</th><th class="p-3"></th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (category of categories(); track category.id) {
+            <tr>
+              <td class="p-3">{{ category.name }}</td>
+              <td class="p-3">{{ category.slug }}</td>
+              <td class="p-3 text-right space-x-3">
+                <button class="text-brand hover:underline" (click)="startEditCategory(category)">Edit</button>
+                <button class="text-red-600 hover:underline" (click)="deleteCategory(category.id)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (editingCategoryId()) {
+        <div class="card p-6 grid sm:grid-cols-2 gap-3">
+          <div><label>Name</label><input type="text" [(ngModel)]="categoryForm.name" name="name"></div>
+          <div><label>Slug</label><input type="text" [(ngModel)]="categoryForm.slug" name="slug"></div>
+          <div class="sm:col-span-2 flex gap-3">
+            <button class="btn-primary" (click)="saveCategory()">Save category</button>
+            <button class="btn-secondary" (click)="cancelCategory()">Cancel</button>
+          </div>
+        </div>
+      } @else {
+        <button class="btn-secondary" (click)="startCreateCategory()">Add category</button>
+      }
+    </div>
+  }
+
+  @if (tab() === 'orders') {
+    <table class="w-full text-sm card overflow-hidden">
+      <thead class="bg-slate-100 text-left">
+        <tr><th class="p-3">Order</th><th class="p-3">Customer</th><th class="p-3">Total</th><th class="p-3">Status</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (order of orders(); track order.id) {
+          <tr>
+            <td class="p-3">{{ order.id.slice(-8) }}</td>
+            <td class="p-3">{{ order.userId }}</td>
+            <td class="p-3">
+              {{ total(order) | number:'1.2-2' }}
+            </td>
+            <td class="p-3">
+              <select [ngModel]="order.status" (ngModelChange)="changeStatus(order, $event)">
+                @for (status of statuses; track status) {
+                  <option [value]="status">{{ status }}</option>
+                }
+              </select>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td class="p-3 text-slate-500" colspan="4">No orders yet.</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

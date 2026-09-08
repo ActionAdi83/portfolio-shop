@@ -1,0 +1,32 @@
+@if (product(); as product) {
+  <div class="max-w-5xl mx-auto px-4 py-10 grid sm:grid-cols-2 gap-10">
+    <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden">
+      @if (product.imageUrls.length) {
+        <img [src]="product.imageUrls[0]" [alt]="product.name" class="w-full h-full object-cover">
+      } @else {
+        <div class="w-full h-full grid place-items-center text-slate-400">No image yet</div>
+      }
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <a routerLink="/products" class="text-sm text-brand hover:underline">&larr; Back to products</a>
+      <h1 class="text-3xl font-bold">{{ product.name }}</h1>
+      <p class="text-slate-600">{{ product.description }}</p>
+      <span class="text-2xl font-semibold">{{ product.price | number:'1.2-2' }} USD</span>
+      <span class="text-sm" [class.text-red-600]="product.stock <= 0" [class.text-slate-500]="product.stock > 0">
+        {{ product.stock > 0 ? product.stock + ' in stock' : 'Out of stock' }}
+      </span>
+
+      <div class="flex items-center gap-3">
+        <label for="qty" class="mb-0">Quantity</label>
+        <input id="qty" type="number" min="1" class="w-20" [value]="quantity()" (input)="setQuantity($any($event.target).value)">
+      </div>
+
+      <button class="btn-primary w-fit" (click)="addToCart()" [disabled]="product.stock <= 0">
+        {{ added() ? 'Added!' : 'Add to cart' }}
+      </button>
+    </div>
+  </div>
+} @else {
+  <p class="max-w-5xl mx-auto px-4 py-10 text-slate-500">Loading…</p>
+}

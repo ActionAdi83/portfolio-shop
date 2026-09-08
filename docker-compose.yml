@@ -1,0 +1,86 @@
+# Local dev stack: MongoDB + backend + frontend.
+#
+#   cp .env.example .env      # then edit as needed
+#   docker compose up --build
+#
+# Frontend  http://localhost:4300
+# Backend   http://localhost:8082/api
+# Mongo     mongodb://localhost:27018/portfolio_shop
+#
+# Ports are deliberately not the obvious 8080/4200/27017 — this project sits next
+# to the `fanvote` checkout on the same machine, whose own compose stack already
+# uses those.
+#
+# Keycloak and BTCPay are NOT part of this compose file — this project is a
+# sibling of the `fanvote` checkout on the same machine, which already runs both
+# locally (see ../fanvote/docker-compose.yml). Point KEYCLOAK_ISSUER_URI /
+# BTCPAY_* in .env at that stack (from inside a container, the fanvote services
+# are reachable at http://host.docker.internal:8080 and :49392 on Docker
+# Desktop). Leave them unset and the app still starts: public pages work, and
+# the account/admin/payment routes answer 401/503 instead of crashing.
+#
+# A Keycloak realm named "shop" (client "frontend", role "shop-admin") needs to
+# exist wherever KEYCLOAK_ISSUER_URI points — it is not seeded by this compose
+# file. See README.md, "Auth" section.
+
+services:
+  mongo:
+    image: mongo:8.3
+    container_name: portfolio-shop-mongo
+    restart: unless-stopped
+    ports:
+      # 27018, not the default 27017 — that port is already the fanvote stack's
+      # on this machine, and both can run at once this way.
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks: [portfolio-shop]
+
+  backend:
+    build:
+      context: ./backend
+    container_name: portfolio-shop-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/${MONGO_DB:-portfolio_shop}
+      SPRING_DATA_MONGODB_DATABASE: ${MONGO_DB:-portfolio_shop}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://host.docker.internal:8080/realms/shop}
+      BTCPAY_URL: ${BTCPAY_URL:-}
+      BTCPAY_PUBLIC_URL: ${BTCPAY_PUBLIC_URL:-}
+      BTCPAY_STORE_ID: ${BTCPAY_STORE_ID:-}
+      BTCPAY_API_KEY: ${BTCPAY_API_KEY:-}
+      BTCPAY_WEBHOOK_SECRET: ${BTCPAY_WEBHOOK_SECRET:-}
+      BTCPAY_CURRENCY: ${BTCPAY_CURRENCY:-USD}
+      BTCPAY_INVOICE_EXPIRATION_MINUTES: ${BTCPAY_INVOICE_EXPIRATION_MINUTES:-60}
+    ports:
+      - "8082:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks: [portfolio-shop]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NG_CONFIGURATION: development
+    container_name: portfolio-shop-frontend
+    restart: unless-stopped
+    ports:
+      - "4300:80"
+    depends_on:
+      - backend
+    networks: [portfolio-shop]
+
+networks:
+  portfolio-shop:
+
+volumes:
+  mongo-data:
