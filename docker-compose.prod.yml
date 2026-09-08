@@ -1,0 +1,53 @@
+# Production stack for the online shop. No Mongo/Keycloak/BTCPay of its own --
+# joins the sibling `fanvote` project's own Docker network directly (external)
+# to reach its shared containers by name.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# Requires the fanvote stack to already be running (its network,
+# `fanvote_fanvote`, must exist) and its Mongo credentials (MONGO_USER,
+# MONGO_PASSWORD) copied into this project's own .env.prod -- see README.md.
+# BTCPAY_STORE_ID / BTCPAY_API_KEY / BTCPAY_WEBHOOK_SECRET come from a Store
+# created by hand in the BTCPay admin UI (https://pay.adriandragota.com) --
+# same reason fanvote's own setup doesn't automate this: these values cannot
+# exist before the store does.
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: shop-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/${MONGO_DB:-portfolio_shop}?authSource=admin
+      SPRING_DATA_MONGODB_DATABASE: ${MONGO_DB:-portfolio_shop}
+      KEYCLOAK_ISSUER_URI: https://auth.adriandragota.com/realms/shop
+      # Internal address -- backend and btcpayserver share the fanvote_fanvote
+      # network. PUBLIC_URL is what checkout links get rewritten to for the
+      # browser (see BtcPayClient/PaymentService, adapted from fanvote's).
+      BTCPAY_URL: http://btcpayserver:49392
+      BTCPAY_PUBLIC_URL: https://pay.adriandragota.com
+      BTCPAY_STORE_ID: ${BTCPAY_STORE_ID:-}
+      BTCPAY_API_KEY: ${BTCPAY_API_KEY:-}
+      BTCPAY_WEBHOOK_SECRET: ${BTCPAY_WEBHOOK_SECRET:-}
+      BTCPAY_CURRENCY: ${BTCPAY_CURRENCY:-USD}
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70"
+    mem_limit: 640m
+    networks: [fanvote_fanvote]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NG_CONFIGURATION: production
+        APP_DOMAIN: shop.adriandragota.com
+        KEYCLOAK_DOMAIN: auth.adriandragota.com
+    container_name: shop-frontend
+    restart: unless-stopped
+    mem_limit: 64m
+    networks: [fanvote_fanvote]
+
+networks:
+  fanvote_fanvote:
+    external: true
