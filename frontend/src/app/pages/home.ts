@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { ProductService } from '../services/product.service';
 import { CartService } from '../services/cart.service';
 import { Product } from '../entities/product';
+import { imageUrl } from '../util/media';
 
 @Component({
   selector: 'app-home',
@@ -13,6 +14,7 @@ import { Product } from '../entities/product';
 })
 export class HomePage implements OnInit {
   readonly featured = signal<Product[]>([]);
+  readonly imageUrl = imageUrl;
 
   constructor(private products: ProductService, private cart: CartService) {}
 

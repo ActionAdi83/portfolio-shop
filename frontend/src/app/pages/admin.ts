@@ -8,6 +8,7 @@ import { OrderService } from '../services/order.service';
 import { Product, ProductRequest } from '../entities/product';
 import { Category, CategoryRequest } from '../entities/category';
 import { Order, OrderStatus } from '../entities/order';
+import { imageUrl } from '../util/media';
 
 type Tab = 'products' | 'categories' | 'orders';
 
@@ -37,8 +38,9 @@ export class AdminPage implements OnInit {
   readonly products = signal<Product[]>([]);
   readonly editingProductId = signal<string | null>(null);
   productForm: ProductRequest = { ...BLANK_PRODUCT };
-  /** Comma-separated in the form, split into imageUrls on save. */
-  imageUrlsText = '';
+  readonly uploadingImage = signal(false);
+  readonly imageUploadError = signal<string | null>(null);
+  readonly imageUrl = imageUrl;
 
   readonly categories = signal<Category[]>([]);
   readonly editingCategoryId = signal<string | null>(null);
@@ -78,25 +80,49 @@ export class AdminPage implements OnInit {
 
   startCreateProduct() {
     this.editingProductId.set('new');
-    this.productForm = { ...BLANK_PRODUCT };
-    this.imageUrlsText = '';
+    this.productForm = { ...BLANK_PRODUCT, imageUrls: [] };
+    this.imageUploadError.set(null);
   }
 
   startEditProduct(product: Product) {
     this.editingProductId.set(product.id);
-    this.productForm = { ...product };
-    this.imageUrlsText = product.imageUrls.join(', ');
+    this.productForm = { ...product, imageUrls: [...product.imageUrls] };
+    this.imageUploadError.set(null);
   }
 
   cancelProduct() {
     this.editingProductId.set(null);
   }
 
+  /** Uploads every file picked at once; each succeeds or fails independently. */
+  onProductImagesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = input.files ? Array.from(input.files) : [];
+    input.value = ''; // lets the same file be picked again later
+    if (!files.length) return;
+
+    this.imageUploadError.set(null);
+    this.uploadingImage.set(true);
+    let remaining = files.length;
+    files.forEach(file => {
+      this.productService.uploadImage(file).subscribe({
+        next: ({ url }) => {
+          this.productForm.imageUrls = [...this.productForm.imageUrls, url];
+          if (--remaining === 0) this.uploadingImage.set(false);
+        },
+        error: () => {
+          this.imageUploadError.set('One or more photos could not be uploaded.');
+          if (--remaining === 0) this.uploadingImage.set(false);
+        },
+      });
+    });
+  }
+
+  removeProductImage(index: number) {
+    this.productForm.imageUrls = this.productForm.imageUrls.filter((_, i) => i !== index);
+  }
+
   saveProduct() {
-    this.productForm.imageUrls = this.imageUrlsText
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
     const id = this.editingProductId();
     const action = id && id !== 'new'
       ? this.productService.update(id, this.productForm)

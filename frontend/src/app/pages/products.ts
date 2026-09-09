@@ -6,6 +6,7 @@ import { CategoryService } from '../services/category.service';
 import { CartService } from '../services/cart.service';
 import { Product } from '../entities/product';
 import { Category } from '../entities/category';
+import { imageUrl } from '../util/media';
 
 @Component({
   selector: 'app-products',
@@ -17,6 +18,7 @@ export class ProductsPage implements OnInit {
   readonly products = signal<Product[]>([]);
   readonly categories = signal<Category[]>([]);
   readonly selectedSlug = signal<string>('');
+  readonly imageUrl = imageUrl;
 
   constructor(
     private productService: ProductService,

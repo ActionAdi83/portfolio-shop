@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService } from '../services/product.service';
 import { CartService } from '../services/cart.service';
 import { Product } from '../entities/product';
+import { imageUrl } from '../util/media';
 
 @Component({
   selector: 'app-product-detail',
@@ -15,6 +16,7 @@ export class ProductDetailPage implements OnInit {
   readonly product = signal<Product | null>(null);
   readonly quantity = signal(1);
   readonly added = signal(false);
+  readonly imageUrl = imageUrl;
 
   constructor(
     private route: ActivatedRoute,

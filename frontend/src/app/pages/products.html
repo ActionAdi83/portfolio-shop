@@ -24,7 +24,7 @@
         <div class="card p-4 flex flex-col">
           <a [routerLink]="['/products', product.id]" class="block aspect-square bg-slate-100 rounded-md mb-3 overflow-hidden">
             @if (product.imageUrls.length) {
-              <img [src]="product.imageUrls[0]" [alt]="product.name" class="w-full h-full object-cover">
+              <img [src]="imageUrl(product.imageUrls[0])" [alt]="product.name" class="w-full h-full object-cover">
             } @else {
               <div class="w-full h-full grid place-items-center text-slate-400 text-sm">No image yet</div>
             }

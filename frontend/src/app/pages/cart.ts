@@ -10,6 +10,7 @@ import { AccountService } from '../services/account.service';
 import { OrderService } from '../services/order.service';
 import { PaymentService } from '../services/payment.service';
 import { Address, AddressRequest } from '../entities/address';
+import { imageUrl } from '../util/media';
 
 @Component({
   selector: 'app-cart',
@@ -19,6 +20,7 @@ import { Address, AddressRequest } from '../entities/address';
 })
 export class CartPage implements OnInit {
   readonly cart = inject(CartService);
+  readonly imageUrl = imageUrl;
 
   readonly authenticated = signal(false);
   readonly addresses = signal<Address[]>([]);

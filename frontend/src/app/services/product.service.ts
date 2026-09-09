@@ -31,4 +31,11 @@ export class ProductService {
   delete(id: string) {
     return this.http.delete<void>(`${this.adminBase}/${id}`);
   }
+
+  /** Uploads a photo from disk; the returned `url` is what goes into imageUrls. */
+  uploadImage(file: File) {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ id: string; url: string }>(`${this.adminBase}/images`, form);
+  }
 }

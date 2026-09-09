@@ -9,7 +9,7 @@
         <div class="flex items-center gap-4 p-4">
           <div class="w-16 h-16 bg-slate-100 rounded-md overflow-hidden shrink-0">
             @if (line.product.imageUrls.length) {
-              <img [src]="line.product.imageUrls[0]" [alt]="line.product.name" class="w-full h-full object-cover">
+              <img [src]="imageUrl(line.product.imageUrls[0])" [alt]="line.product.name" class="w-full h-full object-cover">
             }
           </div>
           <div class="flex-1">
