@@ -29,8 +29,9 @@ import { CartService } from '../services/cart.service';
 
           @if (authenticated) {
             <a routerLink="/account" routerLinkActive="underline" class="px-2 py-2 hover:opacity-80">Account</a>
-            @if (isAdmin) {
-              <a routerLink="/admin" routerLinkActive="underline" class="px-2 py-2 hover:opacity-80">Admin</a>
+            <a routerLink="/admin" routerLinkActive="underline" class="px-2 py-2 hover:opacity-80">Admin</a>
+            @if (!isAdmin) {
+              <span class="px-2 py-1 rounded bg-white/15 text-[10px] font-bold uppercase tracking-wide">Read-only</span>
             }
             <button (click)="logout()" class="px-3 py-1.5 rounded-md bg-white/15 hover:bg-white/25 cursor-pointer">
               Sign out

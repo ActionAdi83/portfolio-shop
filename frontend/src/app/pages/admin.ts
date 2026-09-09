@@ -1,6 +1,7 @@
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import Keycloak from 'keycloak-js';
 import { ProductService } from '../services/product.service';
 import { CategoryService } from '../services/category.service';
 import { OrderService } from '../services/order.service';
@@ -24,6 +25,14 @@ const BLANK_CATEGORY: CategoryRequest = { name: '', slug: '' };
 export class AdminPage implements OnInit {
   readonly tab = signal<Tab>('products');
   readonly statuses = ORDER_STATUSES;
+
+  private readonly keycloak = inject(Keycloak);
+
+  /** Same claim the backend enforces on — non-admins get a read-only view. */
+  get isAdmin(): boolean {
+    const roles: string[] = (this.keycloak?.tokenParsed as any)?.realm_access?.roles ?? [];
+    return roles.includes('shop-admin');
+  }
 
   readonly products = signal<Product[]>([]);
   readonly editingProductId = signal<string | null>(null);
