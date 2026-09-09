@@ -21,33 +21,29 @@
               <td class="p-3">{{ product.price | number:'1.2-2' }}</td>
               <td class="p-3">{{ product.stock }}</td>
               <td class="p-3 text-right space-x-3">
-                @if (isAdmin) {
-                  <button class="text-brand hover:underline" (click)="startEditProduct(product)">Edit</button>
-                  <button class="text-red-600 hover:underline" (click)="deleteProduct(product.id)">Delete</button>
-                }
+                <button class="text-brand hover:underline" (click)="startEditProduct(product)">Edit</button>
+                <button class="text-red-600 hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline" [disabled]="!isAdmin" (click)="deleteProduct(product.id)">Delete</button>
               </td>
             </tr>
           }
         </tbody>
       </table>
 
-      @if (isAdmin) {
-        @if (editingProductId()) {
-          <div class="card p-6 grid sm:grid-cols-2 gap-3">
-            <div><label>Name</label><input type="text" [(ngModel)]="productForm.name" name="name"></div>
-            <div><label>Category slug</label><input type="text" [(ngModel)]="productForm.categorySlug" name="categorySlug"></div>
-            <div class="sm:col-span-2"><label>Description</label><textarea [(ngModel)]="productForm.description" name="description" rows="2"></textarea></div>
-            <div><label>Price</label><input type="number" min="0" step="0.01" [(ngModel)]="productForm.price" name="price"></div>
-            <div><label>Stock</label><input type="number" min="0" [(ngModel)]="productForm.stock" name="stock"></div>
-            <div class="sm:col-span-2"><label>Image URLs (comma separated)</label><input type="text" [(ngModel)]="imageUrlsText" name="imageUrls"></div>
-            <div class="sm:col-span-2 flex gap-3">
-              <button class="btn-primary" (click)="saveProduct()">Save product</button>
-              <button class="btn-secondary" (click)="cancelProduct()">Cancel</button>
-            </div>
+      @if (editingProductId()) {
+        <div class="card p-6 grid sm:grid-cols-2 gap-3">
+          <div><label>Name</label><input type="text" [(ngModel)]="productForm.name" name="name" [disabled]="!isAdmin"></div>
+          <div><label>Category slug</label><input type="text" [(ngModel)]="productForm.categorySlug" name="categorySlug" [disabled]="!isAdmin"></div>
+          <div class="sm:col-span-2"><label>Description</label><textarea [(ngModel)]="productForm.description" name="description" rows="2" [disabled]="!isAdmin"></textarea></div>
+          <div><label>Price</label><input type="number" min="0" step="0.01" [(ngModel)]="productForm.price" name="price" [disabled]="!isAdmin"></div>
+          <div><label>Stock</label><input type="number" min="0" [(ngModel)]="productForm.stock" name="stock" [disabled]="!isAdmin"></div>
+          <div class="sm:col-span-2"><label>Image URLs (comma separated)</label><input type="text" [(ngModel)]="imageUrlsText" name="imageUrls" [disabled]="!isAdmin"></div>
+          <div class="sm:col-span-2 flex gap-3">
+            <button class="btn-primary" [disabled]="!isAdmin" (click)="saveProduct()">Save product</button>
+            <button class="btn-secondary" (click)="cancelProduct()">Cancel</button>
           </div>
-        } @else {
-          <button class="btn-secondary" (click)="startCreateProduct()">Add product</button>
-        }
+        </div>
+      } @else {
+        <button class="btn-secondary" (click)="startCreateProduct()">Add product</button>
       }
     </div>
   }
@@ -64,29 +60,25 @@
               <td class="p-3">{{ category.name }}</td>
               <td class="p-3">{{ category.slug }}</td>
               <td class="p-3 text-right space-x-3">
-                @if (isAdmin) {
-                  <button class="text-brand hover:underline" (click)="startEditCategory(category)">Edit</button>
-                  <button class="text-red-600 hover:underline" (click)="deleteCategory(category.id)">Delete</button>
-                }
+                <button class="text-brand hover:underline" (click)="startEditCategory(category)">Edit</button>
+                <button class="text-red-600 hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline" [disabled]="!isAdmin" (click)="deleteCategory(category.id)">Delete</button>
               </td>
             </tr>
           }
         </tbody>
       </table>
 
-      @if (isAdmin) {
-        @if (editingCategoryId()) {
-          <div class="card p-6 grid sm:grid-cols-2 gap-3">
-            <div><label>Name</label><input type="text" [(ngModel)]="categoryForm.name" name="name"></div>
-            <div><label>Slug</label><input type="text" [(ngModel)]="categoryForm.slug" name="slug"></div>
-            <div class="sm:col-span-2 flex gap-3">
-              <button class="btn-primary" (click)="saveCategory()">Save category</button>
-              <button class="btn-secondary" (click)="cancelCategory()">Cancel</button>
-            </div>
+      @if (editingCategoryId()) {
+        <div class="card p-6 grid sm:grid-cols-2 gap-3">
+          <div><label>Name</label><input type="text" [(ngModel)]="categoryForm.name" name="name" [disabled]="!isAdmin"></div>
+          <div><label>Slug</label><input type="text" [(ngModel)]="categoryForm.slug" name="slug" [disabled]="!isAdmin"></div>
+          <div class="sm:col-span-2 flex gap-3">
+            <button class="btn-primary" [disabled]="!isAdmin" (click)="saveCategory()">Save category</button>
+            <button class="btn-secondary" (click)="cancelCategory()">Cancel</button>
           </div>
-        } @else {
-          <button class="btn-secondary" (click)="startCreateCategory()">Add category</button>
-        }
+        </div>
+      } @else {
+        <button class="btn-secondary" (click)="startCreateCategory()">Add category</button>
       }
     </div>
   }
